@@ -14,11 +14,13 @@ angular.module('angularPromiseButtons')
             addClassToCurrentBtnOnly: false,
             disableCurrentBtnOnly: false,
             minDuration: false,
+            showProgress: false,
             CLICK_EVENT: 'click',
             CLICK_ATTR: 'ngClick',
             SUBMIT_EVENT: 'submit',
             SUBMIT_ATTR: 'ngSubmit',
-            BTN_SELECTOR: 'button'
+            BTN_SELECTOR: 'button',
+            PROGRESS_SELECTOR: 'md-progress-linear'
         };
 
         // *****************

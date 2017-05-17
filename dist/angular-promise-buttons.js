@@ -29,12 +29,15 @@ angular.module('angularPromiseButtons')
                  * to loading state.
                  * @param {Object}btnEl
                  */
-                function initLoadingState(btnEl) {
+                function initLoadingState(btnEl, progressElements) {
                     if (cfg.btnLoadingClass && !cfg.addClassToCurrentBtnOnly) {
                         btnEl.addClass(cfg.btnLoadingClass);
                     }
                     if (cfg.disableBtn && !cfg.disableCurrentBtnOnly) {
                         btnEl.attr('disabled', 'disabled');
+                    }
+                    if (progressElements && cfg.showProgress) {
+                        progressElements.removeClass('ng-hide');
                     }
                 }
 
@@ -42,13 +45,16 @@ angular.module('angularPromiseButtons')
                  * Handles everything to be triggered when loading is finished
                  * @param {Object}btnEl
                  */
-                function handleLoadingFinished(btnEl) {
+                function handleLoadingFinished(btnEl, progressElements) {
                     if ((!cfg.minDuration || minDurationTimeoutDone) && promiseDone) {
                         if (cfg.btnLoadingClass) {
                             btnEl.removeClass(cfg.btnLoadingClass);
                         }
                         if (cfg.disableBtn) {
                             btnEl.removeAttr('disabled');
+                        }
+                        if (progressElements && cfg.showProgress) {
+                            progressElements.addClass('ng-hide');
                         }
                     }
                 }
@@ -59,7 +65,7 @@ angular.module('angularPromiseButtons')
                  * @param {Function}watchExpressionForPromise
                  * @param {Object}btnEl
                  */
-                function initPromiseWatcher(watchExpressionForPromise, btnEl) {
+                function initPromiseWatcher(watchExpressionForPromise, btnEl, progressElements) {
                     // watch promise to resolve or fail
                     scope.$watch(watchExpressionForPromise, function(mVal) {
                         minDurationTimeoutDone = false;
@@ -69,24 +75,24 @@ angular.module('angularPromiseButtons')
                         if (cfg.minDuration) {
                             minDurationTimeout = $timeout(function() {
                                 minDurationTimeoutDone = true;
-                                handleLoadingFinished(btnEl);
+                                handleLoadingFinished(btnEl, progressElements);
                             }, cfg.minDuration);
                         }
 
                         // for regular promises
                         if (mVal && mVal.then) {
-                            initLoadingState(btnEl);
+                            initLoadingState(btnEl, progressElements);
                             mVal.finally(function() {
                                 promiseDone = true;
-                                handleLoadingFinished(btnEl);
+                                handleLoadingFinished(btnEl, progressElements);
                             });
                         }
                         // for $resource
                         else if (mVal && mVal.$promise) {
-                            initLoadingState(btnEl);
+                            initLoadingState(btnEl, progressElements);
                             mVal.$promise.finally(function() {
                                 promiseDone = true;
-                                handleLoadingFinished(btnEl);
+                                handleLoadingFinished(btnEl, progressElements);
                             });
                         }
                     });
@@ -145,7 +151,7 @@ angular.module('angularPromiseButtons')
                  * @param {String}attrToParse
                  * @param {Object}btnEl
                  */
-                function initHandlingOfViewFunctionsReturningAPromise(eventToHandle, attrToParse, btnEl) {
+                function initHandlingOfViewFunctionsReturningAPromise(eventToHandle, attrToParse, btnEl, progressElements) {
                     // we need to use evalAsync here, as
                     // otherwise the click or submit event
                     // won't be ready to be replaced
@@ -168,7 +174,7 @@ angular.module('angularPromiseButtons')
                                     if (!promiseWatcher) {
                                         promiseWatcher = initPromiseWatcher(function() {
                                             return promise;
-                                        }, btnEl);
+                                        }, btnEl, progressElements);
                                     }
                                 });
                             });
@@ -195,17 +201,29 @@ angular.module('angularPromiseButtons')
                     return angular.element(submitBtnEls);
                 }
 
+                /**
+                 * Get's all the progress elements in the page.
+                 *
+                 * @returns {Object}
+                 */
+                function getProgressElements() {
+                    // TODO find a way to not get all progress but still be able to get progress anywhere in the page
+                    return angular.element(document).find(cfg.PROGRESS_SELECTOR);
+                }
+
 
                 // INIT
                 // ---------
 
                 // check if there is any value given via attrs.promiseBtn
                 if (!attrs.promiseBtn) {
+                     var progressElements = getProgressElements();
+
                     // handle ngClick function directly returning a promise
                     if (attrs.hasOwnProperty(cfg.CLICK_ATTR)) {
                         appendSpinnerTpl(el);
                         addHandlersForCurrentBtnOnly(el);
-                        initHandlingOfViewFunctionsReturningAPromise(cfg.CLICK_EVENT, cfg.CLICK_ATTR, el);
+                        initHandlingOfViewFunctionsReturningAPromise(cfg.CLICK_EVENT, cfg.CLICK_ATTR, el, progressElements);
                     }
                     // handle ngSubmit function directly returning a promise
                     else if (attrs.hasOwnProperty(cfg.SUBMIT_ATTR)) {
@@ -214,7 +232,7 @@ angular.module('angularPromiseButtons')
 
                         appendSpinnerTpl(btnElements);
                         addHandlersForCurrentBtnOnly(btnElements);
-                        initHandlingOfViewFunctionsReturningAPromise(cfg.SUBMIT_EVENT, cfg.SUBMIT_ATTR, btnElements);
+                        initHandlingOfViewFunctionsReturningAPromise(cfg.SUBMIT_EVENT, cfg.SUBMIT_ATTR, btnElements, progressElements);
                     }
                 }
                 // handle promises passed via scope.promiseBtn
@@ -259,11 +277,13 @@ angular.module('angularPromiseButtons')
             addClassToCurrentBtnOnly: false,
             disableCurrentBtnOnly: false,
             minDuration: false,
+            showProgress: false,
             CLICK_EVENT: 'click',
             CLICK_ATTR: 'ngClick',
             SUBMIT_EVENT: 'submit',
             SUBMIT_ATTR: 'ngSubmit',
-            BTN_SELECTOR: 'button'
+            BTN_SELECTOR: 'button',
+            PROGRESS_SELECTOR: 'md-progress-linear'
         };
 
         // *****************
