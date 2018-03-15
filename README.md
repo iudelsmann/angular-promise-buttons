@@ -1,5 +1,4 @@
-[![Stories in Ready](https://badge.waffle.io/johannesjo/angular-promise-buttons.svg?label=ready&title=Ready)](http://waffle.io/johannesjo/angular-promise-buttons)
-[![Stories in progress](https://badge.waffle.io/johannesjo/angular-promise-buttons.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/johannesjo/angular-promise-buttons)
+[![npm version](https://badge.fury.io/js/angular-promise-buttons.svg)](https://badge.fury.io/js/angular-promise-buttons)
 [![Build Status](https://travis-ci.org/johannesjo/angular-promise-buttons.svg)](https://travis-ci.org/johannesjo/angular-promise-buttons?branch=master)
 [![Coverage Status](https://coveralls.io/repos/johannesjo/angular-promise-buttons/badge.svg?branch=master)](https://coveralls.io/r/johannesjo/angular-promise-buttons?branch=master)
 
